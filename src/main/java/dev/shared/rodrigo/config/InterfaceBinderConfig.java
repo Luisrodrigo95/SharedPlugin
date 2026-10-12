@@ -19,21 +19,7 @@ public class InterfaceBinderConfig {
     public static class Instructions extends ConfigHtmlInstructions {
         @Override
         public String getEditorValue() {
-            boolean isSpanish = false;
-            try {
-                Locale loc = null;
-                try {
-                    loc = com.github.manolo8.darkbot.utils.I18n.getLocale();
-                } catch (Throwable ignored) {
-                }
-                if (loc == null) {
-                    loc = Locale.getDefault();
-                }
-                if (loc != null && "es".equalsIgnoreCase(loc.getLanguage())) {
-                    isSpanish = true;
-                }
-            } catch (Throwable ignored) {
-            }
+            boolean isSpanish = isSpanishLocale();
 
             if (isSpanish) {
                 return "<table width=\"240\" border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td>"
@@ -55,6 +41,20 @@ public class InterfaceBinderConfig {
                         + "2. Select your IP<br>"
                         + "&nbsp;&nbsp;&nbsp;(or enter manual IP)."
                         + "</td></tr></table>";
+            }
+        }
+
+        private static boolean isSpanishLocale() {
+            Locale loc = resolveLocale();
+            return loc != null && "es".equalsIgnoreCase(loc.getLanguage());
+        }
+
+        private static Locale resolveLocale() {
+            try {
+                return com.github.manolo8.darkbot.utils.I18n.getLocale();
+            } catch (Throwable ignored) {
+                // DarkBot I18n utility may not be initialized; fall back to system default locale
+                return Locale.getDefault();
             }
         }
     }

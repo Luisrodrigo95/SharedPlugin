@@ -20,9 +20,13 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Feature(name = "Network Interface / IP Binder", description = "Binds outgoing bot traffic to a selected secondary IP / local network interface")
 public class InterfaceBinder implements Behavior, Configurable<InterfaceBinderConfig>, Installable {
+
+    private static final Logger LOGGER = Logger.getLogger(InterfaceBinder.class.getName());
 
     private InterfaceBinderConfig config;
     private ConfigSetting<InterfaceBinderConfig> configSetting;
@@ -71,6 +75,7 @@ public class InterfaceBinder implements Behavior, Configurable<InterfaceBinderCo
             try {
                 statusSetting.setValue(status);
             } catch (Exception ignored) {
+                // Ignore if UI setting component is not yet fully initialized
             }
         }
     }
@@ -198,16 +203,16 @@ public class InterfaceBinder implements Behavior, Configurable<InterfaceBinderCo
 
                 @Override
                 public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
-                    System.err.println("[InterfaceBinder] Proxy connection failed for " + uri + ": " + ioe.getMessage());
+                    LOGGER.log(Level.WARNING, () -> "[InterfaceBinder] Proxy connection failed for " + uri + ": " + ioe.getMessage());
                 }
             });
 
             setStatus("Active - Bound to " + targetIp.getHostAddress() + " (Port " + port + ")");
-            System.out.println("[InterfaceBinder] Successfully activated on " + targetIp.getHostAddress() + " (Port " + port + ")");
+            LOGGER.log(Level.INFO, () -> "[InterfaceBinder] Successfully activated on " + targetIp.getHostAddress() + " (Port " + port + ")");
 
         } catch (Exception e) {
             setStatus("Error starting proxy: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, () -> "[InterfaceBinder] Error starting proxy: " + e.getMessage());
             stopProxyOnly();
         }
     }
